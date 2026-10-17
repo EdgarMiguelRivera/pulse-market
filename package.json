@@ -2,15 +2,16 @@
   "name": "pulse-market",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
- "dev": "next dev",
+ "scripts": {
+  "dev": "next dev",
   "build": "next build",
   "start": "next start",
-  "lint": "next lint",
+  "lint": "eslint .",
   "test": "vitest run"
-  },
+},
   "dependencies": {
     "@hookform/resolvers": "^5.9.2",
+    "lucide-react": "^1.59.0",
     "next": "16.4.2",
     "next-auth": "^5.0.0-beta.32",
     "react": "19.3.0",
