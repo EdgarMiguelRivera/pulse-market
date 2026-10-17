@@ -1,6 +1,7 @@
 import { auth, signOut } from "@/auth"
 import Link from "next/link"
 import { redirect } from "next/navigation"
+import { Suspense } from "react"
 import { LayoutDashboard, ShoppingBag, Users, LogOut, BarChart3 } from "lucide-react"
 
 export default async function DashboardLayout({
@@ -99,7 +100,11 @@ export default async function DashboardLayout({
           </span>
         </header>
 
-        <main className="p-8 flex-1">{children}</main>
+        <main className="p-8 flex-1">
+          <Suspense fallback={<div className="text-slate-400 animate-pulse">Cargando módulo...</div>}>
+            {children}
+          </Suspense>
+        </main>
       </div>
     </div>
   )
