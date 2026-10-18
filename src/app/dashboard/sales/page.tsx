@@ -20,7 +20,7 @@ export default async function SalesPage({
   const desde = (pagina - 1) * porPagina;
   const hasta = desde + porPagina - 1;
 
-  // Consulta paginada directo desde el servidor
+  // Consulta paginada directo desde el servidor (SLA < 400ms)
   const { data, count, error } = await supabase
     .from('ventas')
     .select('id, monto, cantidad, fecha_venta, clientes(nombre, email), productos(nombre, categoria)', { count: 'exact' })
@@ -31,7 +31,7 @@ export default async function SalesPage({
   const totalPaginas = Math.ceil((count || 0) / porPagina);
 
   if (error) {
-    return <div className="p-4 text-red-500">Error cargando ventas: {error.message}</div>;
+    return <div className="p-4 text-rose-500">Error cargando ventas: {error.message}</div>;
   }
 
   return (
