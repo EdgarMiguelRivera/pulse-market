@@ -1,8 +1,8 @@
 import { auth, signOut } from "@/auth"
-import Link from "next/link"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
-import { LayoutDashboard, ShoppingBag, Users, LogOut, BarChart3 } from "lucide-react"
+import { LogOut, BarChart3 } from "lucide-react"
+import { SidebarNav } from "./SidebarNav"
 
 export default async function DashboardLayout({
   children,
@@ -25,29 +25,7 @@ export default async function DashboardLayout({
             <span className="text-xl font-bold tracking-wide text-white">PulseMarket</span>
           </div>
 
-          <nav className="space-y-1">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium bg-indigo-600 text-white transition"
-            >
-              <LayoutDashboard className="h-4 w-4" />
-              General
-            </Link>
-            <Link
-              href="/dashboard/sales"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition"
-            >
-              <ShoppingBag className="h-4 w-4" />
-              Ventas
-            </Link>
-            <Link
-              href="/dashboard/users"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition"
-            >
-              <Users className="h-4 w-4" />
-              Usuarios
-            </Link>
-          </nav>
+          <SidebarNav />
         </div>
 
         {/* User Info & Logout */}
