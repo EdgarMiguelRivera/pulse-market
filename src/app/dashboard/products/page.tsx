@@ -1,7 +1,6 @@
 import { FormProducto } from '../../../components/FormProducto'
 import { TablaProductos } from '../../../components/TablaProductos'
 import { BulkUpdateProducts } from '../../../components/BulkUpdateProducts'
-export const instant = false;
 
 export default async function ProductsPage({
   searchParams,

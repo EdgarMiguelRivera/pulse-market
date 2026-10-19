@@ -2,7 +2,6 @@ import { TablaProductos } from '../../components/TablaProductos';
 import { supabase } from '../../lib/supabase';
 import { ArrowUpRight, ArrowDownRight, DollarSign, ShoppingBag, Users, TrendingUp, Calendar, Zap } from 'lucide-react';
 
-export const instant = false;
 export default async function DashboardPage() {
   // 1. Obtener la suma total de los montos de ventas
   const { data: ventasData } = await supabase

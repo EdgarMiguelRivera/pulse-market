@@ -1,7 +1,6 @@
 import { Suspense } from 'react'
 import { supabase } from '../../../lib/supabase'
 import { FormVenta } from '../../../components/FormVenta'
-export const instant = false;
 interface VentaItem {
   id: string
   monto: number
