@@ -1,6 +1,7 @@
+"use cache";
+
 import { supabase } from '../../../lib/supabase'
 import { FormVenta } from '../../../components/FormVenta'
-"use cache";
 interface VentaItem {
   id: string
   monto: number
