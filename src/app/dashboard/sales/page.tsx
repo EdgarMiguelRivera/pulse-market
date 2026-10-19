@@ -1,5 +1,4 @@
-"use cache";
-
+import { Suspense } from 'react'
 import { supabase } from '../../../lib/supabase'
 import { FormVenta } from '../../../components/FormVenta'
 interface VentaItem {
