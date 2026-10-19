@@ -1,5 +1,6 @@
 import { supabase } from '../../../lib/supabase'
 import { FormCliente } from '../../../components/FormCliente'
+export const instant = false;
 
 interface UsersPageProps {
   searchParams: Promise<{ page?: string }>
