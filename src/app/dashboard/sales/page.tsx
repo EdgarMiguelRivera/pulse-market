@@ -1,7 +1,6 @@
 import { supabase } from '../../../lib/supabase'
 import { FormVenta } from '../../../components/FormVenta'
-export const dynamic = 'force-dynamic';
-
+"use cache";
 interface VentaItem {
   id: string
   monto: number
