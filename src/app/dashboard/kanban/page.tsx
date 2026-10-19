@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"
 import { getKanbanTasks, updateTaskStatus, createOrderAction } from "./actions"
 import { supabase } from "../../../lib/supabase"
-export const instant = false;
 
 type Task = {
   id: string
