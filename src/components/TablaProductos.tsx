@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { FilaProducto } from './FilaProducto';
 
 interface TablaProductosProps {
   pagina?: number;
@@ -22,6 +23,7 @@ export async function TablaProductos({ pagina = 1, porPagina = 10 }: TablaProduc
     .select('id, nombre, categoria, precio, stock', { count: 'exact' })
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
+    .order('id', { ascending: true }) // Determinación secundaria para evitar saltos
     .range(desde, hasta);
 
   const productos = data as ProductoItem[] | null;
@@ -46,16 +48,12 @@ export async function TablaProductos({ pagina = 1, porPagina = 10 }: TablaProduc
               <th className="px-4 py-3">Categoría</th>
               <th className="px-4 py-3">Precio</th>
               <th className="px-4 py-3">Stock</th>
+              <th className="px-4 py-3 text-right">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800">
             {productos?.map((p: ProductoItem) => (
-              <tr key={p.id} className="hover:bg-slate-800/40 transition-colors">
-                <td className="px-4 py-3 font-medium text-white">{p.nombre}</td>
-                <td className="px-4 py-3">{p.categoria}</td>
-                <td className="px-4 py-3 text-emerald-400 font-bold">${p.precio}</td>
-                <td className="px-4 py-3">{p.stock} u.</td>
-              </tr>
+              <FilaProducto key={p.id} p={p} />
             ))}
           </tbody>
         </table>
@@ -65,13 +63,17 @@ export async function TablaProductos({ pagina = 1, porPagina = 10 }: TablaProduc
       <div className="flex justify-between items-center pt-6">
         <a
           href={`/dashboard/products?page=${pagina - 1}`}
-          className={`px-4 py-2 bg-slate-800 text-sm rounded-lg text-slate-200 ${pagina <= 1 ? 'pointer-events-none opacity-50' : 'hover:bg-slate-700'}`}
+          className={`px-4 py-2 bg-slate-800 text-sm rounded-lg text-slate-200 ${
+            pagina <= 1 ? 'pointer-events-none opacity-50' : 'hover:bg-slate-700'
+          }`}
         >
           Anterior
         </a>
         <a
           href={`/dashboard/products?page=${pagina + 1}`}
-          className={`px-4 py-2 bg-slate-800 text-sm rounded-lg text-slate-200 ${pagina >= totalPaginas ? 'pointer-events-none opacity-50' : 'hover:bg-slate-700'}`}
+          className={`px-4 py-2 bg-slate-800 text-sm rounded-lg text-slate-200 ${
+            pagina >= totalPaginas ? 'pointer-events-none opacity-50' : 'hover:bg-slate-700'
+          }`}
         >
           Siguiente
         </a>

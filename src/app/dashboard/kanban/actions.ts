@@ -3,20 +3,31 @@
 import { supabase } from '../../../lib/supabase'
 import { revalidatePath } from 'next/cache'
 
-// 1. Obtener órdenes con el estado correcto desde el servidor
+// Definimos la interfaz estricta para el retorno de Supabase
+interface VentaQueryRow {
+  id: string | number
+  monto: number
+  estado: string | null
+  fecha_venta: string
+  clientes: { nombre: string } | null
+  productos: { nombre: string } | null
+}
+
 export async function getKanbanTasks() {
   const { data: ventas, error } = await supabase
     .from('ventas')
     .select('id, monto, estado, fecha_venta, clientes(nombre), productos(nombre)')
     .order('fecha_venta', { ascending: false })
-    .limit(30)
+    .limit(100)
 
   if (error) {
     console.error('Error al obtener ventas:', error.message)
     return []
   }
 
-  return (ventas || []).map((v: any, index: number) => {
+  const typedVentas = (ventas as unknown as VentaQueryRow[]) || []
+
+  return typedVentas.map((v, index) => {
     let rawStatus = (v.estado || 'PENDING').toString().toUpperCase()
     if (rawStatus === 'PENDIENTES') rawStatus = 'PENDING'
     if (rawStatus === 'EN PROCESO' || rawStatus === 'IN_PROGRESS') rawStatus = 'IN_PROGRESS'
@@ -28,11 +39,11 @@ export async function getKanbanTasks() {
       customer: v.clientes?.nombre || 'Cliente General',
       amount: `$${Number(v.monto).toFixed(2)}`,
       status: (['PENDING', 'IN_PROGRESS', 'COMPLETED'].includes(rawStatus) ? rawStatus : 'PENDING'),
+      createdAt: v.fecha_venta,
     }
   })
 }
 
-// 2. Actualizar estado de una orden
 export async function updateTaskStatus(taskId: string, newStatus: string) {
   const { error } = await supabase
     .from('ventas')
@@ -47,7 +58,6 @@ export async function updateTaskStatus(taskId: string, newStatus: string) {
   return { success: true }
 }
 
-// 3. Crear nueva orden desde el servidor
 export async function createOrderAction(productoId: string, cantidad: number, monto: number) {
   const { data, error } = await supabase
     .from('ventas')
@@ -66,6 +76,5 @@ export async function createOrderAction(productoId: string, cantidad: number, mo
     return { success: false, message: error.message }
   }
 
-  revalidatePath('/dashboard/kanban')
-  return { success: true, data: data[0] }
+  return { success: true, data: data ? data[0] : null }
 }

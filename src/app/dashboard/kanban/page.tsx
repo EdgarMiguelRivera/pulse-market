@@ -11,6 +11,7 @@ type Task = {
   customer: string
   amount: string
   status: "PENDING" | "IN_PROGRESS" | "COMPLETED"
+  createdAt?: string
 }
 
 type Producto = {
@@ -31,16 +32,18 @@ export default function KanbanPage() {
   const [productos, setProductos] = useState<Producto[]>([])
   const [loading, setLoading] = useState(true)
 
+  // Filtros por fecha
+  const [fechaDesde, setFechaDesde] = useState("")
+  const [fechaHasta, setFechaHasta] = useState("")
+
   // Campos del formulario
   const [newCustomer, setNewCustomer] = useState("")
   const [selectedProducto, setSelectedProducto] = useState<Producto | null>(null)
   const [cantidad, setCantidad] = useState(1)
 
-  // Cargar datos a través de la Server Action
   const loadTasks = async () => {
     setLoading(true)
     
-    // Cargar lista de productos
     const { data: prods } = await supabase
       .from("productos")
       .select("id, nombre, precio")
@@ -51,7 +54,6 @@ export default function KanbanPage() {
       setSelectedProducto(prods[0])
     }
 
-    // Cargar tareas directamente desde el backend
     const loadedTasks = await getKanbanTasks()
     setTasks(loadedTasks as Task[])
     setLoading(false)
@@ -60,6 +62,26 @@ export default function KanbanPage() {
   useEffect(() => {
     loadTasks()
   }, [])
+
+  // Filtrado robusto por rangos de fecha con milisegundos / timestamp
+  const tasksFiltradas = tasks.filter((task) => {
+    if (!fechaDesde && !fechaHasta) return true
+    if (!task.createdAt) return false
+
+    const taskTime = new Date(task.createdAt).getTime()
+
+    if (fechaDesde) {
+      const desdeTime = new Date(`${fechaDesde}T00:00:00`).getTime()
+      if (taskTime < desdeTime) return false
+    }
+
+    if (fechaHasta) {
+      const hastaTime = new Date(`${fechaHasta}T23:59:59`).getTime()
+      if (taskTime > hastaTime) return false
+    }
+
+    return true
+  })
 
   const onDragEnd = async (result: DropResult) => {
     const { destination, source, draggableId } = result
@@ -70,13 +92,11 @@ export default function KanbanPage() {
 
     const newStatus = destination.droppableId as Task["status"]
 
-    // Actualización optimista de UI
     const previousTasks = [...tasks]
     setTasks((prev) =>
       prev.map((task) => (task.id === draggableId ? { ...task, status: newStatus } : task))
     )
 
-    // Guardado en Supabase vía Server Action
     const response = await updateTaskStatus(draggableId, newStatus)
 
     if (!response.success) {
@@ -90,7 +110,6 @@ export default function KanbanPage() {
     if (!newCustomer || !selectedProducto) return
 
     const totalCalculado = selectedProducto.precio * cantidad
-
     const res = await createOrderAction(selectedProducto.id, cantidad, totalCalculado)
 
     if (!res.success) {
@@ -119,13 +138,49 @@ export default function KanbanPage() {
         </button>
       </div>
 
+      {/* Bar de Filtro por Rango de Fechas */}
+      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-wrap items-end gap-4 shadow-xl">
+        <div>
+          <label className="block text-xs font-medium text-slate-400 mb-1">Fecha Desde</label>
+          <input
+            type="date"
+            value={fechaDesde}
+            onChange={(e) => setFechaDesde(e.target.value)}
+            className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-slate-400 mb-1">Fecha Hasta</label>
+          <input
+            type="date"
+            value={fechaHasta}
+            onChange={(e) => setFechaHasta(e.target.value)}
+            className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+          />
+        </div>
+
+        {(fechaDesde || fechaHasta) && (
+          <button
+            type="button"
+            onClick={() => {
+              setFechaDesde("")
+              setFechaHasta("")
+            }}
+            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-lg border border-slate-700 transition-colors"
+          >
+            ✕ Limpiar Filtro
+          </button>
+        )}
+      </div>
+
       {loading ? (
         <div className="p-8 text-center text-slate-400">Sincronizando órdenes con Supabase...</div>
       ) : (
         <DragDropContext onDragEnd={onDragEnd}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {COLUMNS.map((col) => {
-              const colTasks = tasks.filter((t) => t.status === col.id)
+              const colTasks = tasksFiltradas.filter((t) => t.status === col.id)
 
               return (
                 <div key={col.id} className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col gap-4">
@@ -159,6 +214,11 @@ export default function KanbanPage() {
                                   <span className="text-xs font-semibold text-indigo-400">{task.amount}</span>
                                 </div>
                                 <p className="text-xs text-slate-400">Cliente: {task.customer}</p>
+                                {task.createdAt && (
+                                  <p className="text-[10px] text-slate-500 mt-2">
+                                    Fecha: {new Date(task.createdAt).toLocaleDateString("es-MX")}
+                                  </p>
+                                )}
                               </div>
                             )}
                           </Draggable>
@@ -204,7 +264,7 @@ export default function KanbanPage() {
                 >
                   {productos.map((prod) => (
                     <option key={prod.id} value={prod.id}>
-                      {prod.nombre} - ${prod.precio}
+                      {prod.nombre} (${prod.precio})
                     </option>
                   ))}
                 </select>

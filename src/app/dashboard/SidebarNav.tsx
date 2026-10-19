@@ -11,7 +11,7 @@ export function SidebarNav() {
     { href: "/dashboard", label: "General", icon: LayoutDashboard },
     { href: "/dashboard/sales", label: "Ventas", icon: ShoppingBag },
     { href: "/dashboard/users", label: "Usuarios", icon: Users },
-    { href: "/dashboard/kanban", label: "Kanban", icon: LayoutDashboard },
+    { href: "/dashboard/kanban", label: "Ordenes", icon: LayoutDashboard },
     { href: "/dashboard/products", label: "Productos", icon: ShoppingBag },
   ]
 
